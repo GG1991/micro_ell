@@ -11,29 +11,27 @@ int assembly_res_ell(double *norm, double *strain_mac)
   for (int i = 0 ; i < (nn*dim) ; i++) res_ell[i] = 0.0;
 
   for (int e = 0 ; e < nelm ; e++) {
+
     for (int i = 0 ; i < (npe*dim) ; i++) res_e[i] = 0.0;
     mesh_struct_get_elem_indeces(&mesh_struct, e, elem_index);
     
-    for (int gp = 0; gp < ngp; gp++) { // integration
+    for (int gp = 0 ; gp < ngp ; gp++) { // integration res_e
       get_strain(e, gp, strain_gp);
       get_stress(e, gp, strain_gp, stress_gp);
-      for (int i = 0; i < npe*dim; i++) {
-	for (int j = 0; j < nvoi; j++)
+      for (int i = 0 ; i < (npe*dim) ; i++)
+	for (int j = 0 ; j < nvoi ; j++)
 	  res_e[i] += struct_bmat[j][i][gp] * stress_gp[j] * struct_wp[gp];
-      }
     }
-    
-    for (int i = 0; i < (npe*dim); i++) 
-      res_ell[elem_index[i]] += res_e[i]; // assembly
+    for (int i = 0; i < (npe*dim); i++) res_ell[elem_index[i]] += res_e[i]; // assembly
   }
 
   if (params.fe2_bc == BC_USTRAIN) {
     for (int d = 0; d < dim ; d++) {
-      for (int n = 0; n < mesh_struct.ny - 2 ; n++) {
+      for (int n = 0 ; n < (mesh_struct.ny - 2) ; n++) {
 	res_ell[mesh_struct.nods_x0[n]*dim + d] = 0.0;
 	res_ell[mesh_struct.nods_x1[n]*dim + d] = 0.0;
       }
-      for (int n = 0; n < mesh_struct.nx - 2 ; n++) {
+      for (int n = 0 ; n < (mesh_struct.nx - 2) ; n++) {
 	res_ell[mesh_struct.nods_y0[n]*dim + d] = 0.0;
 	res_ell[mesh_struct.nods_y1[n]*dim + d] = 0.0;
       }
@@ -58,7 +56,7 @@ int assembly_jac_ell(void)
   int dim = mesh_struct.dim;
   int nelm = mesh_struct.nelm;
   double *jac_e = malloc((npe*dim*npe*dim) * sizeof(double));
-  double *ctang = malloc(nvoi*nvoi*sizeof(double));
+  double *ctang = malloc((nvoi*nvoi) * sizeof(double));
 
   ell_set_zero_mat(&jac_ell);
   for (int e = 0 ; e < nelm ; e++) {
@@ -75,7 +73,6 @@ int assembly_jac_ell(void)
 	  for (int k = 0; k < nvoi ; k++)
 	    for (int h = 0; h < nvoi; h++)
 	      jac_e[ i*(npe*dim) + j] += struct_bmat[h][i][gp] * ctang[h*nvoi + k] * struct_bmat[k][j][gp] * struct_wp[gp];
-
     }
     ell_add_vals(&jac_ell, elem_index, npe*dim, elem_index, npe*dim, jac_e); // assembly
   }

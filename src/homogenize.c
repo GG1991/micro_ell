@@ -29,8 +29,7 @@ int homog_get_c_tangent(double *strain_mac, double **c_tangent)
 int homog_calculate_c_tangent_around_zero(double *c_tangent)
 {
   double strain_zero[MAX_NVOIGT];
-  for (int i = 0 ; i < nvoi ; i++)
-    strain_zero[i] = 0.0;
+  for (int i = 0 ; i < nvoi ; i++) strain_zero[i] = 0.0;
 
   return homog_calculate_c_tangent(strain_zero, c_tangent);
 }
@@ -52,8 +51,7 @@ int homog_calculate_c_tangent(double *strain_mac, double *c_tangent)
   for (int i = 0 ; i < nvoi ; i++) {
 
     printf("exp %d\n", i);
-    for (int i = 0 ; i < nvoi ; i++)
-      strain_2[i] = strain_mac[i];
+    for (int j = 0 ; j < nvoi ; j++) strain_2[i] = strain_mac[i];
 
     strain_2[i] = strain_2[i] + HOMOGENIZE_DELTA_STRAIN;
 
@@ -124,16 +122,12 @@ int homog_fe2(double *strain_mac, double *strain_ave, double *stress_ave)
 int set_disp_0(double *strain_mac)
 {
   double displ[2];
-  if (params.solver == SOL_PETSC) {
-    
-  }else if (params.solver == SOL_ELL) {
 
-    if (params.fe2_bc == BC_USTRAIN) {
-      for (int n = 0; n < mesh_struct.nnods_boundary ; n++) {
-	strain_x_coord(strain_mac, &mesh_struct.boundary_coord[n*dim], displ);
-	for (int d = 0; d < dim ; d++)
-	  x_ell[mesh_struct.boundary_indeces[n*dim + d]] = displ[d];
-      }
+  if (params.fe2_bc == BC_USTRAIN) {
+    for (int n = 0; n < mesh_struct.nnods_boundary ; n++) {
+      strain_x_coord(strain_mac, &mesh_struct.boundary_coord[n*dim], displ);
+      for (int d = 0; d < dim ; d++)
+	x_ell[mesh_struct.boundary_indeces[n*dim + d]] = displ[d];
     }
   }
   return 0;
