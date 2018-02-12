@@ -23,7 +23,8 @@ int assembly_res_ell(double *norm, double *strain_mac)
       }
     }
     
-    for (int i = 0; i < (npe*dim); i++ ) res_ell[elem_index[i]] += res_e[i]; // assembly
+    for (int i = 0; i < (npe*dim); i++) 
+      res_ell[elem_index[i]] += res_e[i]; // assembly
   }
 
   if (params.fe2_bc == BC_USTRAIN) {

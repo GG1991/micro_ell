@@ -2,22 +2,7 @@
 
 int homog_get_strain_stress(double *strain_mac, double *strain_ave, double *stress_ave)
 {
-  int ierr;
-
-  if (flags.linear_materials == true && flags.c_linear_calculated == true) {
-
-    for (int i = 0 ; i < nvoi ; i++) {
-      strain_ave[i] = strain_mac[i];
-      stress_ave[i] = 0.0;
-      for (int j = 0 ; j < nvoi ; j++)
-	stress_ave[i] += params.c_tangent_linear[i*nvoi + j] * strain_mac[j];
-    }
-  }else{
-
-    ierr = homog_get_strain_stress_non_linear(strain_mac, strain_ave, stress_ave);
-    if (ierr) return 1;
-  }
-  return 0;
+  return homog_get_strain_stress_non_linear(strain_mac, strain_ave, stress_ave);
 }
 
 int homog_get_strain_stress_non_linear(double *strain_mac, double *strain_ave, double *stress_ave)
@@ -57,7 +42,7 @@ int homog_calculate_c_tangent(double *strain_mac, double *c_tangent)
   double strain_aux[MAX_NVOIGT];
 
   for (int i = 0 ; i < nvoi ; i++)
-    printf("%s%lf", (i == 0)?"calc stress in for strain: ":" ", strain_1[i]);
+    printf("%s%lf%s", (i == 0)?"calc stress in for strain: ":" ", strain_1[i], (i == (nvoi-1))?"\n":"");
 
   for (int i = 0 ; i < nvoi ; i++)
     strain_1[i] = strain_mac[i];

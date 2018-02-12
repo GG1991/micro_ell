@@ -1,2 +1,5 @@
 *.swp
 obj/*
+exs/*
+!exs/ex_1.sh
+micro

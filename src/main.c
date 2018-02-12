@@ -27,27 +27,16 @@ int main(int argc, char **argv)
 
   myio_comm_line_init(argc, argv, &command_line);
 
-  init_variables_1();
-
   myio_comm_line_search_option(&command_line, "-help", &found);
   if (found == true) {
     printf("%s", help);
     goto end;
   }
 
+  init_variables_1();
+
   ierr = comm_line_set_flags();
   if(ierr != 0) CHECK(ierr, "error in reading command line");
-
-  if(nproc_mic != 1){
-    printf(RED "error during coloring, more than one process detected in micro\n" NORMAL);
-    goto end_no_message;
-  }
-
-  ierr = myio_comm_line_get_int(&command_line, "-dim", &dim, &found);
-  if (found == false) {
-    printf("-dim not given on command line.\n");
-    goto end;
-  }
 
   nvoi = (dim == 2) ? 3 : 6;
 
