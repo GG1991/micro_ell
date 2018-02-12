@@ -2,4 +2,7 @@
 obj/*
 exs/*
 !exs/ex_1.sh
+unity/*
+!unity/unity_ell.c
+!unity/makefile
 micro
