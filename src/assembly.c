@@ -22,7 +22,7 @@ int assembly_res_ell(double *norm, double *strain_mac)
 	for (int j = 0 ; j < nvoi ; j++)
 	  res_e[i] += struct_bmat[j][i][gp] * stress_gp[j] * struct_wp[gp];
     }
-    for (int i = 0; i < (npe*dim); i++) res_ell[elem_index[i]] += res_e[i]; // assembly
+    for (int i = 0 ; i < (npe*dim) ; i++) res_ell[elem_index[i]] += res_e[i]; // assembly
   }
 
   if (params.fe2_bc == BC_USTRAIN) {

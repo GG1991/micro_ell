@@ -51,7 +51,7 @@ int homog_calculate_c_tangent(double *strain_mac, double *c_tangent)
   for (int i = 0 ; i < nvoi ; i++) {
 
     printf("exp %d\n", i);
-    for (int j = 0 ; j < nvoi ; j++) strain_2[i] = strain_mac[i];
+    for (int j = 0 ; j < nvoi ; j++) strain_2[j] = strain_mac[j];
 
     strain_2[i] = strain_2[i] + HOMOGENIZE_DELTA_STRAIN;
 
@@ -121,15 +121,67 @@ int homog_fe2(double *strain_mac, double *strain_ave, double *stress_ave)
 
 int set_disp_0(double *strain_mac)
 {
-  double displ[2];
+  int nn = mesh_struct.nn;
+  int dim = mesh_struct.dim;
+  double disp[2];
+  double coor[2];
 
   if (params.fe2_bc == BC_USTRAIN) {
-    for (int n = 0; n < mesh_struct.nnods_boundary ; n++) {
-      strain_x_coord(strain_mac, &mesh_struct.boundary_coord[n*dim], displ);
-      for (int d = 0; d < dim ; d++)
-	x_ell[mesh_struct.boundary_indeces[n*dim + d]] = displ[d];
+    for (int n = 0 ; n < (nn*dim) ; n++) x_ell[n] = 0.0;
+    for (int n = 0 ; n < (mesh_struct.ny - 2) ; n++) { 
+      // X0
+      coor[0] = 0.0;
+      coor[1] = (n + 1)*mesh_struct.hy;
+      strain_x_coord(strain_mac, coor, disp);
+      for (int d = 0; d < dim ; d++) 
+	x_ell[mesh_struct.nods_x0[n]*dim + d] = disp[d];
+      // X1
+      coor[0] = mesh_struct.lx;
+      coor[1] = (n + 1)*mesh_struct.hy;
+      strain_x_coord(strain_mac, coor, disp);
+      for (int d = 0; d < dim ; d++) 
+	x_ell[mesh_struct.nods_x1[n]*dim + d] = disp[d];
     }
+    for (int n = 0 ; n < (mesh_struct.nx - 2) ; n++) { 
+      // Y0
+      coor[0] = (n + 1)*mesh_struct.hx;
+      coor[1] = 0.0;
+      strain_x_coord(strain_mac, coor, disp);
+      for (int d = 0; d < dim ; d++) 
+	x_ell[mesh_struct.nods_y0[n]*dim + d] = disp[d];
+      // Y1
+      coor[0] = (n + 1)*mesh_struct.hx;
+      coor[1] = mesh_struct.ly;
+      strain_x_coord(strain_mac, coor, disp);
+      for (int d = 0; d < dim ; d++) 
+	x_ell[mesh_struct.nods_y1[n]*dim + d] = disp[d];
+    }
+
+    coor[0] = 0.0;
+    coor[1] = 0.0;
+    strain_x_coord(strain_mac, coor, disp);
+    for (int d = 0; d < dim ; d++) 
+      x_ell[mesh_struct.nod_x0y0*dim + d] = disp[d];
+
+    coor[0] = mesh_struct.lx;
+    coor[1] = 0.0;
+    strain_x_coord(strain_mac, coor, disp);
+    for (int d = 0; d < dim ; d++) 
+      x_ell[mesh_struct.nod_x1y0*dim + d] = disp[d];
+
+    coor[0] = mesh_struct.lx;
+    coor[1] = mesh_struct.ly;
+    strain_x_coord(strain_mac, coor, disp);
+    for (int d = 0; d < dim ; d++) 
+      x_ell[mesh_struct.nod_x1y1*dim + d] = disp[d];
+
+    coor[0] = 0.0;
+    coor[1] = mesh_struct.ly;
+    strain_x_coord(strain_mac, coor, disp);
+    for (int d = 0; d < dim ; d++) 
+      x_ell[mesh_struct.nod_x0y1*dim + d] = disp[d];
   }
+
   return 0;
 }
 
@@ -230,7 +282,7 @@ int get_elem_disp(int e, double *disp_e)
 
   mesh_struct_get_elem_indeces(&mesh_struct, e, elem_index);
 
-  for (int i = 0; i < (npe*dim); i++) disp_e[i] = x_ell[i];
+  for (int i = 0; i < (npe*dim); i++) disp_e[i] = x_ell[elem_index[i]];
 }
 
 int get_strain(int e, int gp, double *strain_gp)
