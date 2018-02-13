@@ -9,19 +9,19 @@ else
 CFLAGS=-g -O0 -lm -std=gnu11
 endif
 
-all: unity_ell
+all: ell_jacobi
 
-unity_ell: unity_ell.o $(OBJ_DIR)/ell.o
-	gcc -o unity_ell $^ -lm ${CFLAGS}
+ell_jacobi: ell_jacobi.o $(OBJ_DIR)/ell.o
+	gcc -o ell_jacobi $^ -lm ${CFLAGS}
 
-unity_ell.o: unity_ell.c $(HEA_DIR)/ell.h
+ell_jacobi.o: ell_jacobi.c $(HEA_DIR)/ell.h
 	gcc -c -g -o $@ $< -I$(HEA_DIR) -std=gnu11 ${CFLAGS}
 
 $(OBJ_DIR)/ell.o: ../src/ell.c $(HEA_DIR)/ell.h
 	gcc -c -g -o $@ $< -I$(HEA_DIR) -std=gnu11 ${CFLAGS}
 
 clean:	    
-	rm -f $(OBJ_DIR)/* *.o unity_ell
+	rm -f $(OBJ_DIR)/* *.o ell_jacobi
 
 run:
-	./unity_ell
+	./ell_jacobi

@@ -23,7 +23,7 @@ typedef struct ell_matrix_ {
 typedef struct ell_solver_ {
   int max_its;
   int its;
-  double min_err;
+  double min_tol;
   double err;
 } ell_solver;
 

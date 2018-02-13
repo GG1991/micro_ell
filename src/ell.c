@@ -142,40 +142,50 @@ int ell_mvp (ell_matrix * m, double *x, double *y)
 
 int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
 {
-  if (m == NULL || b == NULL || x == NULL) return 1;
-  double *r_i = malloc (m->nrow * sizeof(double));
-  double *e_i = malloc (m->nrow * sizeof(double));
+  // A = K - N  
+  // K = diag(A)
+  // N_ij = -a_ij for i!=j  and =0 if i=j
+  // x_(i) = K^-1 * ( N * x_(i-1) + b )
 
-  // k_diag_inv(i,j) = 1/m(i,j) for i = j and k_diag_inv(i,j) = 0 for i /= j
-  double *k_diag_inv = malloc (m->nrow * sizeof(double));
+  if (m == NULL || b == NULL || x == NULL) return 1;
+  
+  double *k = malloc (m->nrow * sizeof(double)); // K = diag(A)
+  double *e_i = malloc(m->nrow * sizeof(double));
+
   for (int i = 0 ; i < m->nrow ; i++) {
-    ell_get_val (m, i, i, &k_diag_inv[i]);
-    k_diag_inv[i] = 1/k_diag_inv[i];
+    ell_get_val (m, i, i, &k[i]);
+    k[i] = 1 / k[i];
   }
 
   int its = 0;
-  int max_its = MAX_ITS;
+  int max_its = solver->max_its;
   double err;
-  double min_err = MIN_ERR;
+  double min_tol = solver->min_tol;
 
   while (its < max_its) {
 
-    // r_(i) = m * x_(i-1) - b
     err = 0;
-    ell_mvp (m, x, r_i);
-    for (int i = 0 ; i < m->nrow ; i++) {
-      r_i[i] -= b[i];
-      err += r_i[i] * r_i[i];
+    int i = 0;
+    while (i < m->nrow) {
+      double aux = 0.0; // sum_(j!=i) a_ij * x_j
+      int j = 0;
+      while (j < m->nnz) {
+        if (m->cols[i*m->nnz + j] == -1) break;
+        if (m->cols[i*m->nnz + j] != i)
+	  aux += m->vals[i*m->nnz + j] * x[m->cols[i*m->nnz + j]];
+	j++;
+      }
+      x[i] = k[i] * (-1*aux + b[i]);
+      i++;
     }
-    err = sqrt(err); if (err < min_err) break;
 
-    for (int i = 0 ; i < m->nrow ; i++) {
-      e_i[i] = k_diag_inv[i] * r_i[i];
+    err = 0;
+    ell_mvp (m, x, e_i);
+    for (int i = 0 ; i < m->nrow ; i++){
+      e_i[i] -= b[i];
+      err += e_i[i] * e_i[i];
     }
-    for (int i = 0 ; i < m->nrow ; i++) {
-      x[i] -= e_i[i];
-    }
-
+    err = sqrt(err); if (err < min_tol) break;
     its ++;
   }
   solver->err = err;

@@ -5,11 +5,11 @@
 #define RED  "\x1B[31m"
 #define GRN  "\x1B[32m"
 
-#define N 10
+#define N 100
 
 int main(void)
 {
-  printf("ell.c / ell.h test\n");
+  printf("ell.c/ell.h : jacobi iterative method\n");
 
   double *x = malloc(N*sizeof(double));
   double *b = malloc(N*sizeof(double));
@@ -30,17 +30,18 @@ int main(void)
   ell_set_zero_col(&m, 0, 1);
   ell_set_zero_col(&m, N-1, 1);
 
-  printf("\nm=\n");
-  ell_print_full(&m);
+//  printf("\nm=\n");
+//  ell_print_full(&m);
+
+  solver.max_its = 100000;
+  solver.min_tol = 1.0e-5;
   ell_solve_jacobi(&solver, &m, b, x);
 
-  FILE *fl = fopen("sol.dat","w");
-  for (int i = 0 ; i < N ; i++) {
+  FILE *fl = fopen("sol_jacobi.dat","w");
+  for (int i = 0 ; i < N ; i++)
     fprintf(fl,"%lf\n", x[i]);
-  }
   fclose(fl);
-  printf("\nerr = %lf\n", solver.err);
-  printf("its = %d\n", solver.its);
+  printf("err = %lf\nits = %d\n", solver.err, solver.its);
 
   return 0;
 }
