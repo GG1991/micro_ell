@@ -34,6 +34,7 @@ int ell_add_vals (ell_matrix *m, int *ix, int nx, int *iy, int ny, double *vals)
 int ell_mvp (ell_matrix *m, double *x, double *y);
 int ell_get_val (ell_matrix *m, int row, int col, double *val);
 int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x);
+int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x);
 int ell_set_zero_row (ell_matrix *m, int row, double diag_val);
 int ell_set_zero_col (ell_matrix *m, int col, double diag_val);
 int ell_set_zero_mat (ell_matrix * m);

@@ -107,7 +107,7 @@ int ell_set_zero_col (ell_matrix *m, int col, double diag_val)
     int j = 0;
     while (j < m->nnz) {
       if (m->cols[(i*m->nnz) + j] == -1) {
-	return 0;
+	break;
       } else if (m->cols[(i*m->nnz) + j] == col) {
 	m->vals[(i*m->nnz) + j] = (i == col) ? diag_val : 0.0;
       }
@@ -142,11 +142,11 @@ int ell_mvp (ell_matrix * m, double *x, double *y)
 
 int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
 {
-  // A = K - N  
-  // K = diag(A)
-  // N_ij = -a_ij for i!=j  and =0 if i=j
-  // x_(i) = K^-1 * ( N * x_(i-1) + b )
-
+  /* A = K - N  
+   * K = diag(A)
+   * N_ij = -a_ij for i!=j  and =0 if i=j
+   * x_(i) = K^-1 * ( N * x_(i-1) + b )
+   */
   if (m == NULL || b == NULL || x == NULL) return 1;
   
   double *k = malloc (m->nrow * sizeof(double)); // K = diag(A)
@@ -186,6 +186,86 @@ int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
       err += e_i[i] * e_i[i];
     }
     err = sqrt(err); if (err < min_tol) break;
+    its ++;
+  }
+  solver->err = err;
+  solver->its = its;
+  return 0;
+}
+
+int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
+{
+  /* cg with jacobi preconditioner
+   * r_1 residue in actual iteration
+   * z_1 = K^-1 * r_0 actual auxiliar vector
+   * rho_0 rho_1 = r_0^t * z_1 previous and actual iner products <r_i, K^-1, r_i>
+   * p_1 actual search direction
+   * q_1 = A*p_1 auxiliar vector
+   * d_1 = rho_0 / (p_1^t * q_1) actual step
+   * x_1 = x_0 - d_1 * p_1
+   * r_1 = r_0 - d_1 * q_1
+  */
+  if (m == NULL || b == NULL || x == NULL) return 1;
+  
+  int its = 0;
+  double *k = malloc(m->nrow * sizeof(double)); // K = diag(A)
+  double *r = malloc(m->nrow * sizeof(double));
+  double *z = malloc(m->nrow * sizeof(double));
+  double *p = malloc(m->nrow * sizeof(double));
+  double *q = malloc(m->nrow * sizeof(double));
+  double rho_0, rho_1, d;
+  double err;
+
+  for (int i = 0 ; i < m->nrow ; i++) {
+    ell_get_val (m, i, i, &k[i]);
+    k[i] = 1 / k[i];
+  }
+
+  ell_mvp (m, x, r);
+  for (int i = 0 ; i < m->nrow ; i++)
+    r[i] -= b[i];
+
+  err = 0;
+  for (int i = 0 ; i < m->nrow ; i++)
+    err += r[i] * r[i];
+  err = sqrt(err); if (err < solver->min_tol) return 0;
+
+  while (its < solver->max_its) {
+
+    for (int i = 0 ; i < m->nrow ; i++)
+      z[i] = k[i] * r[i];
+
+    rho_1 = 0.0;
+    for (int i = 0 ; i < m->nrow ; i++)
+      rho_1 += r[i] * z[i];
+
+    if (its == 0) {
+      for (int i = 0 ; i < m->nrow ; i++)
+	p[i] = z[i];
+    } else {
+      double beta = rho_1 / rho_0;
+      for (int i = 0 ; i < m->nrow ; i++)
+	p[i] = z[i] + beta * p[i];
+    }
+
+    ell_mvp (m, p, q);
+    double aux = 0;
+    for (int i = 0 ; i < m->nrow ; i++)
+      aux += p[i] * q[i];
+    d = rho_1 / aux;
+
+    for (int i = 0 ; i < m->nrow ; i++) {
+      x[i] -= d * p[i];
+      r[i] -= d * q[i];
+    }
+
+    rho_0 = rho_1;
+
+    err = 0;
+    for (int i = 0 ; i < m->nrow ; i++)
+      err += r[i] * r[i];
+    err = sqrt(err); if (err < solver->min_tol) break;
+
     its ++;
   }
   solver->err = err;
