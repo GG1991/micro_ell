@@ -15,11 +15,6 @@ flags_t flags;
 solver_t solver;
 mesh_struct_t mesh_struct;
 
-#define CHECK(error, message) {\
-  if (error != 0) {\
-    printf( "%s\n", message);\
-    goto end;}}
-
 int main(int argc, char **argv)
 {
   int ierr;
@@ -36,7 +31,7 @@ int main(int argc, char **argv)
   init_variables_1();
 
   ierr = comm_line_set_flags();
-  if(ierr != 0) CHECK(ierr, "error in reading command line");
+  if(ierr != 0) goto end;
 
   nvoi = (dim == 2) ? 3 : 6;
 
@@ -63,7 +58,7 @@ int main(int argc, char **argv)
   ngp = (dim == 2) ? 4 : 8;
 
   ierr = material_fill_list_from_command_line(&command_line, &material_list);
-  CHECK(ierr, "error parsing material from command line");
+  if (ierr != 0) goto end;
 
   printf(GREEN
       "--------------------------------------------------\n"
@@ -73,10 +68,10 @@ int main(int argc, char **argv)
   ierr = alloc_memory();
 
   ierr = micro_struct_init_elem_type(&micro_struct, dim, mesh_struct.nelm, &get_elem_centroid, elem_type);
-  CHECK(ierr, "error initializing elem_type array using micro_struct");
+  if (ierr != 0) goto end;
 
   ierr = micro_check_material_and_elem_type(&material_list, elem_type, mesh_struct.nelm);
-  CHECK(ierr, "error checking elem_type and material_list");
+  if (ierr != 0) goto end;
 
   double h[3]; h[0] = mesh_struct.hx; h[1] = mesh_struct.hy; h[2] = mesh_struct.hz;
   fem_init();
@@ -97,8 +92,6 @@ end:
       "--------------------------------------------------\n"
       "  MICRO: FINISH\n"
       "--------------------------------------------------" NORMAL "\n");
-
-end_no_message:
 
   ierr = finalize();
 
