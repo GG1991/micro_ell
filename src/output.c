@@ -1,27 +1,5 @@
 #include "micro.h"
 
-
-int micro_print_info(void)
-{
-  FILE *fm = fopen("micro_info.dat","w");
-
-  fprintf(fm,"-----------\n");
-  fprintf(fm,"nproc %d\n", nproc_mic);
-  fprintf(fm,"-----------\n");
-  fprintf(fm,"nx    ny    nz\n");
-  fprintf(fm,"%2d    %2d    %2d\n",mesh_struct.nx, mesh_struct.ny, mesh_struct.nz);
-  fprintf(fm,"lx    ly    lz\n");
-  fprintf(fm,"%lf    %lf    %lf\n",mesh_struct.lx, mesh_struct.ly, mesh_struct.lz);
-  fprintf(fm,"hx    hy    hz\n");
-  fprintf(fm,"%lf    %lf    %lf\n",mesh_struct.hx, mesh_struct.hy, mesh_struct.hz);
-  fprintf(fm,"nex   ney   nez\n");
-  fprintf(fm,"%2d    %2d    %2d\n",mesh_struct.nex, mesh_struct.ney, mesh_struct.nez);
-  fprintf(fm,"-----------\n");
-
-  fclose(fm);
-  return 0;
-}
-
 int micro_pvtu(char *name)
 {
   FILE *fm;
@@ -50,7 +28,6 @@ int micro_pvtu(char *name)
       "</PPointData>\n"
 
       "<PCellData>\n"
-      "<PDataArray type=\"Int32\"   Name=\"part\"   NumberOfComponents=\"1\"/>\n"
       "<PDataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"%d\"/>\n"
       "<PDataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"%d\"/>\n"
       "<PDataArray type=\"Int32\"   Name=\"elem_type\" NumberOfComponents=\"1\"/>\n"
@@ -60,7 +37,7 @@ int micro_pvtu(char *name)
   fprintf(fm, "<Piece Source=\"%s.vtu\"/>\n</PUnstructuredGrid>\n</VTKFile>\n",file_name);
   fclose(fm);
 
-  sprintf(file_name, "%s_%d.vtu", name, rank_mic);
+  sprintf(file_name, "%s_%d.vtu", name, 0);
   fm = fopen(file_name, "w");
   if (fm == NULL) {
     printf("Problem trying to opening file %s for writing\n", file_name);
@@ -124,11 +101,6 @@ int micro_pvtu(char *name)
     }
   }
   fprintf(fm,"</DataArray>\n</PointData>\n<CellData>\n");
-
-  fprintf(fm,"<DataArray type=\"Int32\" Name=\"part\" NumberOfComponents=\"1\" format=\"ascii\">\n");
-  for (int e = 0; e < mesh_struct.nelm ; e++)
-    fprintf(fm, "%d ", rank_mic);
-  fprintf( fm, "\n</DataArray>\n");
 
   fprintf(fm,"<DataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"%d\" format=\"ascii\">\n",nvoi);
   for (int e = 0; e < mesh_struct.nelm; e++) {

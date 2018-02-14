@@ -28,12 +28,10 @@ enum {SOL_PETSC, SOL_ELL};
 #define BLUE   "\x1B[34m"
 #define NORMAL "\x1B[0m"
 
-#define MAX_NVOIGT   6
+#define MAX_NVOIGT 6
 
-#define NBUF         256
+#define NBUF 256
 
-int rank_mic;
-int nproc_mic;
 int dim;
 int nvoi;
 
@@ -85,8 +83,7 @@ extern flags_t flags;
 
 double center_domain[3];
 
-int micro_print_info( void );
-int micro_pvtu( char *name );
+int micro_pvtu(char *name);
 
 int micro_check_material_and_elem_type(list_t *material_list, int *elem_type, int nelm);
 

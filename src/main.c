@@ -87,8 +87,6 @@ int main(int argc, char **argv)
   for (int i = 0 ; i < (nvoi*nvoi) ; i++)
     printf("%e%s", (fabs(ctang[i])>1.0) ? ctang[i] : 0.0, ((i+1) % nvoi == 0) ? "\n":" ");
 
-  micro_print_info();
-
 end:
 
   printf(GREEN
