@@ -127,6 +127,10 @@ int alloc_memory(void);
 
 int comm_line_set_flags(void);
 
+int localize_strain (double *strain);
+int homogenize_stress (double *stress);
+int get_ctang (double *strain, double *ctang);
+
 int homog_get_c_tangent(double *strain_mac, double **c_tangent);
 int homog_get_rho(double *rho);
 int homog_calculate_c_tangent(double *strain_mac, double *c_tangent);
