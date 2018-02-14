@@ -20,7 +20,7 @@ MIC = ${INC_DIR}/micro.h \
       ${INC_DIR}/trace.h
 
 OBJ  = ${OBJ_DIR}/main.o \
-       ${OBJ_DIR}/homogenize.o \
+       ${OBJ_DIR}/loc_hom.o \
        ${OBJ_DIR}/micro_struct.o \
        ${OBJ_DIR}/init.o \
        ${OBJ_DIR}/finalize.o \

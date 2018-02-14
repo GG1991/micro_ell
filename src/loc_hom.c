@@ -1,92 +1,18 @@
 #include "micro.h"
 
-int homog_get_strain_stress(double *strain_mac, double *strain_ave, double *stress_ave)
-{
-  return homog_get_strain_stress_non_linear(strain_mac, strain_ave, stress_ave);
-}
-
-int homog_get_strain_stress_non_linear(double *strain_mac, double *strain_ave, double *stress_ave)
-{
-  return homog_fe2(strain_mac, strain_ave, stress_ave);
-}
-
-int homog_get_c_tangent(double *strain_mac, double **c_tangent)
-{
-  int ierr = 0;
-
-  if (flags.linear_materials == true && flags.linear_materials == true)
-    (*c_tangent) = params.c_tangent_linear;
-
-  else if (flags.linear_materials == false) {
-
-    ierr = homog_calculate_c_tangent(strain_mac, params.c_tangent);
-    (*c_tangent) = params.c_tangent;
-  }
-
-  return ierr;
-}
-
-int homog_calculate_c_tangent_around_zero(double *c_tangent)
-{
-  double strain_zero[MAX_NVOIGT];
-  for (int i = 0 ; i < nvoi ; i++) strain_zero[i] = 0.0;
-
-  return homog_calculate_c_tangent(strain_zero, c_tangent);
-}
-
-int homog_calculate_c_tangent(double *strain_mac, double *c_tangent)
-{
-  double strain_1[MAX_NVOIGT], strain_2[MAX_NVOIGT];
-  double stress_1[MAX_NVOIGT], stress_2[MAX_NVOIGT];
-  double strain_aux[MAX_NVOIGT];
-
-  for (int i = 0 ; i < nvoi ; i++)
-    printf("%s%lf%s", (i == 0)?"calc stress in for strain: ":" ", strain_1[i], (i == (nvoi-1))?"\n":"");
-
-  for (int i = 0 ; i < nvoi ; i++)
-    strain_1[i] = strain_mac[i];
-
-  int ierr = homog_get_strain_stress(strain_1, strain_aux, stress_1);
-
-  for (int i = 0 ; i < nvoi ; i++) {
-
-    printf("exp %d\n", i);
-    for (int j = 0 ; j < nvoi ; j++) strain_2[j] = strain_mac[j];
-
-    strain_2[i] = strain_2[i] + HOMOGENIZE_DELTA_STRAIN;
-
-    ierr = homog_get_strain_stress(strain_2, strain_aux, stress_2);
-
-    for (int j = 0 ; j < nvoi ; j++)
-      c_tangent[j*nvoi + i] = (stress_2[j] - stress_1[j]) / (strain_2[i] - strain_1[i]);
-
-    if (flags.print_pvtu == true) {
-      get_elem_properties();
-      char filename[64];
-      sprintf(filename,"micro_exp%d",i);
-      ierr = micro_pvtu(filename);
-      if (ierr != 0) {
-	printf("Problem writing vtu file\n");
-	return ierr;
-      }
-    }
-  }
-  return 0;
-}
-
-int homog_fe2(double *strain_mac, double *strain_ave, double *stress_ave)
+int localize_strain (double *strain)
 {
   clock_t start, end;
   double time_ass_b = 0.0, time_ass_A = 0.0, time_sol = 0.0;
 
-  set_disp_0(strain_mac);
+  set_disp_0(strain);
 
   int nl_its = 0;
   double res_norm = params.nl_min_norm * 10;
   while (nl_its < params.nl_max_its && res_norm > params.nl_min_norm) {
 
     start = clock();
-    assembly_res_ell(&res_norm, strain_mac);
+    assembly_res_ell(&res_norm, strain);
     end = clock();
     time_ass_b = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf(GREEN "|b| = %lf" NORMAL "\n", res_norm);
@@ -113,10 +39,68 @@ int homog_fe2(double *strain_mac, double *strain_ave, double *stress_ave)
   printf(BLUE "time ass_b = %lf" NORMAL "\n", time_ass_b);
   printf(BLUE "time ass_A = %lf" NORMAL "\n", time_ass_A);
   printf(BLUE "time sol   = %lf" NORMAL "\n", time_sol);
-
-  get_averages(strain_ave, stress_ave);
-
   return 0;
+}
+
+int homogenize_stress (double *strain, double *stress)
+{
+  for (int i = 0; i < nvoi; i++) stress[i] = strain[i] = 0.0;
+
+  for (int e = 0 ; e < mesh_struct.nelm ; e++) {
+    for (int gp = 0; gp < ngp; gp++) {
+      get_strain(e, gp, strain_gp);
+      get_stress(e, gp, strain_gp, stress_gp);
+      for (int i = 0; i < nvoi; i++) {
+	stress[i] += stress_gp[i] * struct_wp[gp];
+	strain[i] += strain_gp[i] * struct_wp[gp];
+      }
+    }
+  }
+
+  for (int i = 0; i < nvoi; i++) {
+    stress[i] /= mesh_struct.vol;
+    strain[i] /= mesh_struct.vol;
+  }
+  return 0;
+}
+
+int get_ctang (double *strain, double *ctang)
+{
+  int ierr;
+  double *eps_2 = malloc(nvoi * sizeof(double));
+  double *sig_1 = malloc(nvoi * sizeof(double));
+  double *sig_2 = malloc(nvoi * sizeof(double));
+  double *eps_dummy = malloc(nvoi * sizeof(double));
+
+  for (int i = 0 ; i < nvoi ; i++)
+    printf("%s%lf%s", (i == 0)?"calc stress in for strain: ":" ", strain[i], (i == (nvoi-1))?"\n":"");
+
+  for (int i = 0 ; i < nvoi ; i++)
+    eps_2[i] = strain[i];
+
+  ierr = localize_strain(strain);
+  ierr = homogenize_stress(eps_dummy, sig_1); // we can check with eps_dummy if the localization have been done well
+
+  for (int i = 0 ; i < nvoi ; i++) {
+
+    printf("exp %d\n", i);
+    for (int j = 0 ; j < nvoi ; j++)
+      eps_2[j] = strain[j];
+    eps_2[i] = eps_2[i] + DELTA_EPS;
+
+    ierr = localize_strain(eps_2);
+    ierr = homogenize_stress(eps_dummy, sig_2);
+
+    for (int j = 0 ; j < nvoi ; j++)
+      ctang[j*nvoi + i] = (sig_2[j] - sig_1[j]) / (eps_2[i] - strain[i]);
+
+    if (flags.print_pvtu == true) {
+      get_elem_properties();
+      char filename[64]; sprintf(filename,"micro_exp%d",i);
+      ierr = micro_pvtu(filename);
+    }
+  }
+  return ierr;
 }
 
 int set_disp_0(double *strain_mac)

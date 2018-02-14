@@ -79,10 +79,13 @@ int main(int argc, char **argv)
 
   init_variables_2();
 
+  double strain[3] = {0.0, 0.0, 0.0};
+  double ctang[9];
+  get_ctang (strain, ctang);
+
   printf("\nctang = \n");
-  for (int i = 0 ; i < nvoi ; i++)
-    for (int j = 0 ; j < nvoi ; j++)
-      printf("%e%s", (fabs(params.c_tangent_linear[i*nvoi+j])>1.0) ? params.c_tangent_linear[i*nvoi+j] : 0.0, (j == nvoi-1)?"\n":" ");
+  for (int i = 0 ; i < (nvoi*nvoi) ; i++)
+    printf("%e%s", (fabs(ctang[i])>1.0) ? ctang[i] : 0.0, ((i+1) % nvoi == 0) ? "\n":" ");
 
   micro_print_info();
 

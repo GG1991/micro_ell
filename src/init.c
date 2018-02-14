@@ -14,7 +14,6 @@ int init_variables_1(void)
   flags.coupled = false;
   flags.linear_materials = false;
   flags.allocated = false;
-  flags.c_linear_calculated = false;
   flags.print_pvtu = false;
   flags.print_vectors = false;
   flags.print_matrices = false;
@@ -38,13 +37,5 @@ int init_variables_2(void)
     }
   }
 
-  int ierr = 0;
-  if (material_are_all_linear(&material_list) == true){
-    printf("calc ctan around for linear micro-structure...\n");
-    ierr = homog_calculate_c_tangent_around_zero(params.c_tangent_linear);
-    flags.linear_materials = true;
-    flags.c_linear_calculated = true;
-  }
-
-  return ierr;
+  return 0;
 }

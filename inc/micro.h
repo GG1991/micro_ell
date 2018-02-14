@@ -21,7 +21,7 @@ enum {MULTIS_NULL, MULTIS_MIXS, MULTIS_MIXP, MULTIS_FE2};
 enum {BC_NULL, BC_USTRAIN, BC_USTRESS, BC_PERIODIC};
 enum {SOL_PETSC, SOL_ELL};
 
-#define HOMOGENIZE_DELTA_STRAIN      0.005
+#define DELTA_EPS 0.005
 
 #define GREEN  "\x1B[32m"
 #define RED    "\x1B[31m"
@@ -71,8 +71,6 @@ typedef struct {
   int solver;
 
   double nl_min_norm;
-  double c_tangent_linear[MAX_NVOIGT*MAX_NVOIGT];
-  double c_tangent[MAX_NVOIGT*MAX_NVOIGT];
   double rho;
 
 } params_t;
@@ -82,7 +80,6 @@ typedef struct {
   bool coupled;
   bool allocated;
   bool linear_materials;
-  bool c_linear_calculated;
   bool print_pvtu;
   bool print_vectors;
   bool print_matrices;
@@ -128,16 +125,9 @@ int alloc_memory(void);
 int comm_line_set_flags(void);
 
 int localize_strain (double *strain);
-int homogenize_stress (double *stress);
+int homogenize_stress (double *strain, double *stress);
 int get_ctang (double *strain, double *ctang);
 
-int homog_get_c_tangent(double *strain_mac, double **c_tangent);
-int homog_get_rho(double *rho);
-int homog_calculate_c_tangent(double *strain_mac, double *c_tangent);
-int homog_calculate_c_tangent_around_zero(double *c_tangent);
-int homog_get_strain_stress(double *strain_mac, double *strain_ave, double *stress_ave);
-int homog_get_strain_stress_non_linear(double *strain_mac, double *strain_ave, double *stress_ave);
-int homog_fe2(double *strain_mac, double *strain_ave, double *stress_ave);
 int set_disp_0(double *strain_mac);
 int negative_res(void);
 int add_x_dx(void);
