@@ -15,7 +15,7 @@ int localize_strain (double *strain)
     assembly_res_ell(&res_norm, strain);
     end = clock();
     time_ass_b = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf(GREEN "|b| = %lf" NORMAL "\n", res_norm);
+    printf(GRE"|b| = %lf" NOR"\n", res_norm);
 
     if (res_norm < params.nl_min_norm) break;
 
@@ -36,9 +36,9 @@ int localize_strain (double *strain)
     nl_its ++;
   }
 
-  printf(BLUE "time ass_b = %lf" NORMAL "\n", time_ass_b);
-  printf(BLUE "time ass_A = %lf" NORMAL "\n", time_ass_A);
-  printf(BLUE "time sol   = %lf" NORMAL "\n", time_sol);
+  printf(BLU "time ass_b = %lf" NOR "\n", time_ass_b);
+  printf(BLU "time ass_A = %lf" NOR "\n", time_ass_A);
+  printf(BLU "time sol   = %lf" NOR "\n", time_sol);
   return 0;
 }
 

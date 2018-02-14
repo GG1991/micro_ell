@@ -23,10 +23,10 @@ enum {SOL_PETSC, SOL_ELL};
 
 #define DELTA_EPS 0.005
 
-#define GREEN  "\x1B[32m"
-#define RED    "\x1B[31m"
-#define BLUE   "\x1B[34m"
-#define NORMAL "\x1B[0m"
+#define RED "\x1B[31m"
+#define GRE "\x1B[32m"
+#define BLU "\x1B[34m"
+#define NOR "\x1B[0m"
 
 #define MAX_NVOIGT 6
 

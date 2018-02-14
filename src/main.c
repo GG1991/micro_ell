@@ -45,11 +45,11 @@ int main(int argc, char **argv)
 
   if (found == true) {
     if (nval_found != nval_expect) {
-      printf(RED "-struct_n should include %d arguments\n" NORMAL, nval_expect);
+      printf(RED "-struct_n should include %d arguments\n" NOR, nval_expect);
       return 1;
     }
   }else{
-    printf(RED "-struct_n is request\n" NORMAL, nval_expect);
+    printf(RED "-struct_n is request\n" NOR, nval_expect);
     return 1;
   }
 
@@ -60,10 +60,10 @@ int main(int argc, char **argv)
   ierr = material_fill_list_from_command_line(&command_line, &material_list);
   if (ierr != 0) goto end;
 
-  printf(GREEN
+  printf(GRE
       "--------------------------------------------------\n"
       "  MICRO: START\n"
-      "--------------------------------------------------" NORMAL "\n");
+      "--------------------------------------------------" NOR"\n");
 
   ierr = alloc_memory();
 
@@ -89,10 +89,10 @@ int main(int argc, char **argv)
 
 end:
 
-  printf(GREEN
+  printf(GRE
       "--------------------------------------------------\n"
       "  MICRO: FINISH\n"
-      "--------------------------------------------------" NORMAL "\n");
+      "--------------------------------------------------" NOR"\n");
 
   ierr = finalize();
 
