@@ -7,7 +7,7 @@ OPT = 0
 ifeq ($(OPT),1)
 CFLAGS=-O3
 else
-CFLAGS=-g -O0 -lm -std=gnu11
+CFLAGS=-g -O0 -lm -std=gnu11 -fopenmp
 endif
 
 MIC = ${INC_DIR}/micro.h \
@@ -46,7 +46,7 @@ all: micro
 LDFLAG = -lgsl -lgslcblas -lm
 
 micro: ${OBJ}
-	gcc -o micro $^ ${LDFLAG}
+	gcc -o micro $^ ${LDFLAG} ${CFLAGS}
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.c ${INC_DIR}
 	gcc -c -o $@ $< ${CFLAGS} -I${INC_DIR}

@@ -68,7 +68,7 @@ int main(int argc, char **argv)
   printf(GREEN
       "--------------------------------------------------\n"
       "  MICRO: START\n"
-      "--------------------------------------------------" NORMAL "\n\n");
+      "--------------------------------------------------" NORMAL "\n");
 
   ierr = alloc_memory();
 
@@ -84,13 +84,10 @@ int main(int argc, char **argv)
 
   init_variables_2();
 
-  printf("\nctang_0 = \n");
-  for (int i = 0 ; i < nvoi ; i++) {
+  printf("\nctang = \n");
+  for (int i = 0 ; i < nvoi ; i++)
     for (int j = 0 ; j < nvoi ; j++)
-      printf("%e ", (fabs(params.c_tangent_linear[i*nvoi+j])>1.0) ? params.c_tangent_linear[i*nvoi+j] : 0.0);
-    printf("\n");
-  }
-  printf("\n");
+      printf("%e%s", (fabs(params.c_tangent_linear[i*nvoi+j])>1.0) ? params.c_tangent_linear[i*nvoi+j] : 0.0, (j == nvoi-1)?"\n":" ");
 
   micro_print_info();
 

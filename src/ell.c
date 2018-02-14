@@ -128,6 +128,8 @@ int ell_mvp (ell_matrix * m, double *x, double *y)
 {
   //  y = m * x
   if (m == NULL || x == NULL || y == NULL) return 1;
+
+#pragma omp parallel for
   for (int i = 0 ; i < m->nrow ; i++) {
     y[i] = 0;
     int j = 0;

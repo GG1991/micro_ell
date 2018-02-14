@@ -4,6 +4,7 @@
 #include <stdlib.h> 
 #include <stdio.h>
 #include <math.h>
+#include <omp.h>
 
 #define NRM  "\x1B[0m"
 #define RED  "\x1B[31m"

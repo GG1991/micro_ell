@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#../micro \
-gdb -x file.gdb --args ../micro \
-    -struct_n 4,4 \
+#gdb -x file.gdb --args ../micro \
+../micro \
+    -struct_n 75,75 \
     -dim 2 \
     -material "MATRIX MAT_ELASTIC 1.0e7 1.0e6 0.3","FIBER MAT_ELASTIC 1.0e7 1.0e7 0.3" \
     -micro_struct "fiber_cilin 3.0 3.0 1 1 0.75 0.0 0.0" \

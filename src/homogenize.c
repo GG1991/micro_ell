@@ -205,7 +205,9 @@ int add_x_dx (void)
 int solve (void)
 {
   ell_solver solver;
-  ell_solve_jacobi(&solver, &jac_ell, res_ell, dx_ell);
+  solver.max_its = 400;
+  solver.min_tol = 1.0e-5;
+  ell_solve_cg(&solver, &jac_ell, res_ell, dx_ell);
   return 0;
 }
 
