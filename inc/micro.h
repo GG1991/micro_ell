@@ -18,7 +18,7 @@
 #include "ell.h"
 
 enum {MULTIS_NULL, MULTIS_MIXS, MULTIS_MIXP, MULTIS_FE2};
-enum {BC_NULL, BC_USTRAIN, BC_USTRESS, BC_PERIODIC};
+enum {BC_NULL, BC_USTRAIN, BC_USTRESS, BC_PER_MS, BC_PER_LM};
 enum {SOL_PETSC, SOL_ELL};
 
 #define DELTA_EPS 0.005
@@ -38,25 +38,19 @@ int dim;
 int nvoi;
 
 int ngp;
+int *elem_index;
+int *elem_nods;
+int *elem_type;
 double **struct_sh;
 double ***struct_dsh;
 double *struct_wp;
 double ***struct_bmat;
 double *elem_disp;
-int *elem_index;
-int *elem_nods;
 double *strain_gp;
 double *stress_gp;
-int *elem_type;
 double *elem_strain;
 double *elem_stress;
 double *elem_energy;
-
-double vi;
-double vm;
-
-int homo_type;
-int macro_gp;
 
 ell_matrix jac_ell;
 double *x_ell;
@@ -90,8 +84,6 @@ extern params_t params;
 extern flags_t flags;
 
 double center_domain[3];
-
-int voigt2mat(double voigt[6], double matrix[3][3]);
 
 int micro_print_info( void );
 int micro_pvtu( char *name );

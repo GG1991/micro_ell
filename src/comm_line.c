@@ -7,7 +7,8 @@ int comm_line_set_flags(void)
   myio_comm_line_get_int(&command_line, "-dim", &dim, &found); if (found == false) { printf("-dim not given on command line.\n"); return 1; }
 
   myio_comm_line_search_option(&command_line, "-bc_ustrain", &found); if (found == true) params.fe2_bc = BC_USTRAIN;
-  myio_comm_line_search_option(&command_line, "-bc_periodic", &found); if (found == true) params.fe2_bc = BC_PERIODIC;
+  myio_comm_line_search_option(&command_line, "-bc_per_ms", &found); if (found == true) params.fe2_bc = BC_PER_MS;
+  myio_comm_line_search_option(&command_line, "-bc_per_lm", &found); if (found == true) params.fe2_bc = BC_PER_LM;
   myio_comm_line_search_option(&command_line, "-bc_ustress", &found); if (found == true) params.fe2_bc = BC_USTRESS;
   if (params.fe2_bc == BC_NULL) { printf("comm_line.c : A BC should be specify : (-bc_ustrain -bc_ustress -bc_ustress)\n"); return 2; }
 

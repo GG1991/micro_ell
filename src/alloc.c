@@ -4,17 +4,24 @@ int alloc_memory(void) {
 
   int ierr = 0;
   int nnz = (mesh_struct.dim == 2)? 18:81;
+  int nn = mesh_struct.nn;
+  int nx = mesh_struct.nx;
+  int ny = mesh_struct.ny;
+  int dim = mesh_struct.dim;
 
   int nrows = 0;
   switch (params.fe2_bc) {
     case BC_USTRAIN:
-      nrows = mesh_struct.nn * mesh_struct.dim;
+      nrows = nn * dim;
       break;
-    case BC_PERIODIC:
-      nrows = (mesh_struct.nn + (mesh_struct.nx - 2) + (mesh_struct.ny - 2)) * mesh_struct.dim;
+    case BC_PER_LM:
+      nrows = (nn + (nx - 2) + (ny - 2)) * dim;
+      break;
+    case BC_PER_MS:
+      nrows = (nn - nx - ny + 2) * dim;
       break;
     case BC_USTRESS:
-      nrows = mesh_struct.nn*mesh_struct.dim + nvoi;
+      nrows = nn * dim + nvoi;
       break;
     default:
       return 1;
